@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – Autoryzacja</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+
+<div class="mockup-presentation">
+  <div class="mockup-header">
+    <div class="mockup-title">Yo-Lingo Platform</div>
+    <div class="mockup-meta">Scentralizowany Panel Autoryzacji</div>
+  </div>
+
+  <div class="browser-mockup">
+    <div class="browser-bar">
+      <div class="browser-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="browser-url">
+        <span class="lock-icon">🔒</span>
+        <span class="url-text">yo-lingo.pl/login</span>
+      </div>
+      <div class="browser-actions"></div>
+    </div>
+
+    <div class="browser-content login-page" style="overflow-y: auto; padding: 40px 0;">
+      <div class="login-wrapper" style="display: flex; flex-direction: column; gap: 30px; align-items: center;">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div style="width: 100%; max-width: 450px; padding: 14px; border-radius: var(--radius); background: {% if category=='success' %}#d1fae5; color: #065f46;{% else %}#fee2e2; color: #991b1b;{% endif %} font-family: var(--font-body); font-weight: bold; text-align: center;">
+                {{ msg }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="login-container-mockup" style="max-width: 500px; width: 100%;">
+          <div class="login-logo">
+            <img src="/css/logo.png" alt="Yo-Lingo" class="login-logo-img">
+          </div>
+
+          <div class="login-header">
+            <h1 class="login-title">Zaloguj się do platformy</h1>
+          </div>
+
+          <form action="/login" method="POST" class="login-form-mockup">
+            <div class="form-group">
+              <label for="email">Adres e-mail</label>
+              <input type="email" id="email" name="email" placeholder="twoj.email@yo-lingo.pl" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+              <label for="password">Hasło</label>
+              <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+              Zaloguj się
+            </button>
+          </form>
+
+          <div style="margin-top: 20px; padding: 15px; border: 1px dashed var(--border-medium); border-radius: var(--radius); font-family: var(--font-body);">
+            <p style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 600;">Zapomniałeś hasła? Podaj e-mail, aby odzyskać dostęp:</p>
+            <form action="/password-reset" method="POST" style="display: flex; gap: 10px;">
+              <input type="email" name="email" placeholder="e-mail" required style="flex: 1; padding: 8px; border: 2px solid var(--border-light); border-radius: var(--radius);">
+              <button type="submit" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.85rem;">Resetuj</button>
+            </form>
+          </div>
+
+          <div class="login-divider">
+            <span>Rejestracja Nowego Konta</span>
+          </div>
+
+          <form action="/register" method="POST" class="login-form-mockup" style="background: var(--bg-section); padding: 15px; border-radius: var(--radius);">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+              <div style="flex: 1;">
+                <label style="font-size: 0.8rem; font-weight: 600;">Imię</label>
+                <input type="text" name="first_name" required style="width: 100%; padding: 8px; border: 2px solid var(--border-light); border-radius: var(--radius);">
+              </div>
+              <div style="flex: 1;">
+                <label style="font-size: 0.8rem; font-weight: 600;">Nazwisko</label>
+                <input type="text" name="last_name" required style="width: 100%; padding: 8px; border: 2px solid var(--border-light); border-radius: var(--radius);">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label style="font-size: 0.8rem; font-weight: 600;">E-mail rejestracji</label>
+              <input type="email" name="email" required style="width: 100%; padding: 8px; border: 2px solid var(--border-light); border-radius: var(--radius);">
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label style="font-size: 0.8rem; font-weight: 600;">Hasło dostępowe</label>
+              <input type="password" name="password" required minlength="6" placeholder="Min. 6 znaków" style="width: 100%; padding: 8px; border: 2px solid var(--border-light); border-radius: var(--radius);">
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label style="font-size: 0.8rem; font-weight: 600;">Powtórz hasło</label>
+              <input type="password" name="password_confirm" required minlength="6" placeholder="Wpisz hasło ponownie" style="width: 100%; padding: 8px; border: 2px solid var(--border-light); border-radius: var(--radius);">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+              <label style="font-size: 0.8rem; font-weight: 600;">Typ Konta (Rola)</label>
+              <select name="role" style="width: 100%; padding: 8px; border: 2px solid var(--border-light); border-radius: var(--radius);">
+                <option value="STUDENT">Uczeń / Słuchacz</option>
+                <option value="TEACHER">Lektor / Nauczyciel</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-accent" style="width: 100%; padding: 10px;">Utwórz konto użytkownika</button>
+          </form>
+
+          <div class="login-divider">
+            <span>Szybkie skróty testowe ( Seed Data )</span>
+          </div>
+          <div style="font-family: var(--font-body); font-size: 0.85rem; text-align: center; color: var(--text-secondary); margin-bottom: 15px;">
+            Dla ułatwienia prezentacji, loginy testowe z hasłem: <strong>password</strong>:<br>
+            • Admin: <span style="font-family: monospace; background:#eee; padding:2px 4px;">admin@yo-lingo.pl</span><br>
+            • Lektor: <span style="font-family: monospace; background:#eee; padding:2px 4px;">marta.nowak@lektor.pl</span><br>
+            • Uczeń: <span style="font-family: monospace; background:#eee; padding:2px 4px;">jan.kowalski@student.pl</span>
+          </div>
+
+          <div class="security-notice">
+            <div class="security-icon">🔒</div>
+            <div class="security-text">
+              <strong>Bezpieczne logowanie</strong>
+              <p>Szyfrowanie haseł w bazie danych (scrypt/pbkdf2)</p>
+            </div>
+          </div>
+
+          <div class="back-to-home">
+            <a href="/">← Powrót do strony głównej</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

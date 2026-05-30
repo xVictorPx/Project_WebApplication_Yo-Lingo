@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – Panel Ucznia</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+
+<div class="mockup-presentation">
+  <div class="mockup-header">
+    <div class="mockup-title">Yo-Lingo Platform</div>
+    <div class="mockup-meta">Pulpit Słuchacza · Profil i Komunikacja</div>
+  </div>
+
+  <div class="browser-mockup">
+    <div class="browser-bar">
+      <div class="browser-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="browser-url">
+        <span class="lock-icon">🔒</span>
+        <span class="url-text">yo-lingo.pl/student/dashboard</span>
+      </div>
+      <div class="browser-actions"></div>
+    </div>
+
+    <div class="browser-content dashboard-page" style="overflow-y: auto;">
+      
+      <div class="dashboard-topbar">
+        <div class="dashboard-brand">
+          <div class="logo-badge">YL</div>
+          <div class="brand-text">Yo-Lingo</div>
+          <span class="user-badge" style="background: rgba(59, 130, 246, 0.1); color: var(--brand-primary); border-color: var(--brand-primary);">Uczeń</span>
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+          <a href="/" class="btn btn-outline" style="padding: 8px 16px;">Strona Główna</a>
+          <a href="/profile" class="btn btn-outline" style="padding: 8px 16px;">Mój profil</a>
+          <a href="/logout" class="btn" style="background: var(--text-secondary); color: white;">Wyloguj</a>
+        </div>
+      </div>
+
+      <div class="dashboard-container">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div style="padding: 14px; margin-bottom: 20px; border-radius: var(--radius); background: #d1fae5; color: #065f46; font-family: var(--font-body); font-weight: bold;">
+                {{ msg }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="dashboard-welcome">
+          <div class="welcome-text">
+            <h1>Cześć, {{ session.get('user_name') }}! 👋</h1>
+            <p>Twoje postępy w nauce języków obcych i komunikacja z lektorami.</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2r 1fr; gap: 30px; font-family: var(--font-body);">
+          
+          <div style="grid-column: span 2;">
+            <h2 class="section-title-dashboard" style="margin-bottom: 20px;">Moje aktywne kursy (Opłacone)</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              {% for course in courses %}
+              <div style="background: var(--bg-card); border: 2px solid var(--border-light); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                  <div>
+                    <span style="background: var(--brand-gradient); color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin-right: 10px;">{{ course.proficiency_level }}</span>
+                    <strong style="font-size: 1.25rem;">{{ course.title }}</strong>
+                  </div>
+                  <span style="color: var(--success); font-weight: bold; font-size: 0.9rem;">● Aktywny dostęp</span>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">{{ course.description }}</p>
+                
+                <div style="margin-bottom: 15px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+                    <span style="color: var(--text-muted);">Twój postęp w nauce:</span>
+                    <strong>{{ course.progress_percentage }}%</strong>
+                  </div>
+                  <div style="width: 100%; height: 10px; background: #e5e7eb; border-radius: 999px; overflow: hidden;">
+                    <div style="width: {{ course.progress_percentage }}%; height: 100%; background: var(--brand-gradient); border-radius: 999px; transition: width 0.4s ease;"></div>
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: var(--text-secondary); border-top: 1px solid var(--border-light); padding-top: 12px; gap: 10px; flex-wrap: wrap;">
+                  <span>Nauczyciel prowadzący: <strong>{{ course.teacher_name }}</strong></span>
+                  <div style="display:flex; gap:8px;">
+                    <form method="POST" action="/enrollment/cancel/{{ course.id }}" onsubmit="return confirm('Czy na pewno chcesz anulować zapis na ten kurs? Stracisz dostęp do materiałów.');" style="margin:0;">
+                      <button type="submit" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.8rem; color: var(--danger); border-color: var(--danger);">Anuluj zapis</button>
+                    </form>
+                    <a href="/course/{{ course.id }}/lessons" class="btn btn-primary" style="padding: 6px 16px; font-size: 0.85rem;">Przejdź do lekcji</a>
+                  </div>
+                </div>
+              </div>
+              {% else %}
+              <div style="background: var(--bg-section); padding: 30px; text-align: center; border-radius: var(--radius); border: 2px dashed var(--border-medium);">
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">Nie jesteś obecnie zapisany na żaden kurs.</p>
+                <a href="/" class="btn btn-primary">Przeglądaj ofertę i kup kurs</a>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+
+        <div class="dashboard-section" style="margin-top: 40px; border-top: 2px solid var(--border-light); padding-top: 30px; font-family: var(--font-body);">
+          <h2 class="section-title-dashboard">Wewnętrzny komunikator (Kontakt z Lektorem)</h2>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+            
+            <div style="background: var(--bg-section); padding: 20px; border-radius: var(--radius); border: 2px solid var(--border-light);">
+              <h3 style="margin-bottom: 15px; font-size: 1.1rem;">Napisz do nauczyciela</h3>
+              <form action="/messages/send" method="POST">
+                <div style="margin-bottom: 15px;">
+                  <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Wybierz lektora:</label>
+                  <select name="receiver_id" required style="width: 100%; padding: 10px; border: 2px solid var(--border-medium); border-radius: var(--radius);">
+                    {% for teacher in teachers %}
+                      <option value="{{ teacher.id }}">mgr {{ teacher.first_name }} {{ teacher.last_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                  <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">Treść pytania / zgłoszenia:</label>
+                  <textarea name="content" rows="4" required placeholder="Wpisz treść wiadomości odnośnie materiałów dydaktycznych lub zadań..." style="width: 100%; padding: 10px; border: 2px solid var(--border-medium); border-radius: var(--radius); resize: vertical;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Wyślij wiadomość do bazy</button>
+              </form>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: var(--radius); border: 2px solid var(--border-light); max-height: 380px; overflow-y: auto;">
+              <h3 style="margin-bottom: 15px; font-size: 1.1rem;">Otrzymane wiadomości (Skrzynka)</h3>
+              
+              {% for msg in messages %}
+              <div style="background: {% if not msg.is_read %}#eef2ff{% else %}#f3f4f6{% endif %}; border-left: 4px solid {% if not msg.is_read %}var(--brand-primary){% else %}var(--brand-secondary){% endif %}; padding: 12px; border-radius: 0 var(--radius) var(--radius) 0; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">
+                  <strong>Od: {{ msg.sender_name }}{% if not msg.is_read %} <span style="background:var(--brand-primary);color:white;padding:1px 6px;border-radius:4px;font-size:0.7rem;margin-left:6px;">Nowa</span>{% endif %}</strong>
+                  <span>{{ msg.created_at }}</span>
+                </div>
+                <p style="font-size: 0.9rem; margin: 0; color: var(--text-primary);">{{ msg.content }}</p>
+              </div>
+              {% else %}
+                <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding-top: 40px;">Brak przychodzących wiadomości w historii.</p>
+              {% endfor %}
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup-footer">
+    <div class="mockup-info">
+      <span class="info-label">Projekt:</span>
+      <span class="info-value">Alicja Radłowska, Wiktor Patajewicz</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

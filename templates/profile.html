@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – Mój profil</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+<div class="mockup-presentation"><div class="browser-mockup"><div class="browser-content dashboard-page">
+
+  <div class="dashboard-topbar">
+    <div class="dashboard-brand">
+      <div class="logo-badge">YL</div>
+      <div class="brand-text">Yo-Lingo</div>
+      <span class="user-badge">Mój profil</span>
+    </div>
+    <div style="display:flex; gap: 12px;">
+      {% if session.get('role') == 'TEACHER' %}<a href="/teacher/dashboard" class="btn btn-outline" style="padding:8px 16px;">← Panel lektora</a>
+      {% elif session.get('role') == 'ADMIN' %}<a href="/admin/dashboard" class="btn btn-outline" style="padding:8px 16px;">← Panel admina</a>
+      {% else %}<a href="/student/dashboard" class="btn btn-outline" style="padding:8px 16px;">← Mój panel</a>{% endif %}
+      <a href="/logout" class="btn" style="background:var(--text-secondary);color:white;padding:8px 16px;">Wyloguj</a>
+    </div>
+  </div>
+
+  <div class="dashboard-container" style="max-width: 920px;">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for category, msg in messages %}
+        <div style="padding:14px;margin-bottom:20px;border-radius:var(--radius);background:{% if category=='success' %}#d1fae5;color:#065f46;{% elif category=='warning' %}#fef3c7;color:#92400e;{% else %}#fee2e2;color:#991b1b;{% endif %}font-family:var(--font-body);font-weight:bold;">{{ msg }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <div class="welcome-text" style="margin-bottom: 24px;">
+      <h1>Mój profil</h1>
+      <p>Edytuj dane konta i zmień hasło dostępowe.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px; font-family: var(--font-body);">
+
+      <!-- DANE OSOBOWE -->
+      <form method="POST" action="/profile" style="background:var(--bg-card);border:2px solid var(--border-light);border-radius:var(--radius-lg);padding:24px;">
+        <input type="hidden" name="action" value="update_data">
+        <h2 style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:18px;letter-spacing:0.3px;">Dane osobowe</h2>
+
+        <div class="form-group">
+          <label>Imię</label>
+          <input type="text" name="first_name" required value="{{ user.first_name }}">
+        </div>
+        <div class="form-group">
+          <label>Nazwisko</label>
+          <input type="text" name="last_name" required value="{{ user.last_name }}">
+        </div>
+        <div class="form-group">
+          <label>Adres e-mail</label>
+          <input type="email" name="email" required value="{{ user.email }}">
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--border-light);font-size:0.85rem;color:var(--text-muted);margin-bottom:18px;">
+          <span>Rola:</span><strong style="color:var(--brand-primary);">{{ user.role }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.85rem;color:var(--text-muted);margin-bottom:18px;">
+          <span>Data rejestracji:</span><span>{{ user.created_at }}</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;">Zapisz zmiany</button>
+      </form>
+
+      <!-- ZMIANA HASŁA -->
+      <form method="POST" action="/profile" style="background:var(--bg-section);border:2px solid var(--border-light);border-radius:var(--radius-lg);padding:24px;">
+        <input type="hidden" name="action" value="change_password">
+        <h2 style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:18px;letter-spacing:0.3px;">Zmiana hasła</h2>
+
+        <div class="form-group">
+          <label>Aktualne hasło</label>
+          <input type="password" name="current_password" required autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label>Nowe hasło</label>
+          <input type="password" name="new_password" required minlength="6" placeholder="Min. 6 znaków" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>Powtórz nowe hasło</label>
+          <input type="password" name="confirm_password" required minlength="6" autocomplete="new-password">
+        </div>
+
+        <div class="security-notice" style="padding:14px;margin-bottom:18px;">
+          <div class="security-icon">🔒</div>
+          <div class="security-text">
+            <strong>Bezpieczeństwo</strong>
+            <p>Hasło jest haszowane algorytmem scrypt i nigdy nie jest przechowywane jawnie.</p>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-accent" style="width:100%;">Zmień hasło</button>
+      </form>
+
+    </div>
+  </div>
+
+</div></div></div>
+</body>
+</html>

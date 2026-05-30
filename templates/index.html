@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – Platforma Językowa</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+
+<div class="mockup-presentation">
+  <div class="mockup-header">
+    <div class="mockup-title">Yo-Lingo Platform</div>
+    <div class="mockup-meta">Strona główna · Aktywny System Backend</div>
+  </div>
+
+  <div class="browser-mockup">
+    <div class="browser-bar">
+      <div class="browser-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="browser-url">
+        <span class="lock-icon">🔒</span>
+        <span class="url-text">yo-lingo.pl</span>
+      </div>
+      <div class="browser-actions"></div>
+    </div>
+
+    <div class="browser-content">
+      
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="brand">
+            <span class="logo-badge">YL</span>
+            <span class="brand-text">Yo-Lingo</span>
+          </div>
+          <nav class="nav">
+            <a href="/" class="nav-link">Kursy</a>
+            {% if session.get('user_id') %}
+              {% if session.get('role') == 'ADMIN' %}
+                <a href="/admin/dashboard" class="nav-link" style="color: var(--danger); font-weight: bold;">Panel Admina</a>
+              {% elif session.get('role') == 'TEACHER' %}
+                <a href="/teacher/dashboard" class="nav-link" style="color: var(--brand-secondary); font-weight: bold;">Panel Lektora</a>
+              {% else %}
+                <a href="/student/dashboard" class="nav-link" style="color: var(--brand-primary); font-weight: bold;">Mój Panel</a>
+              {% endif %}
+              <a href="/logout" class="btn btn-outline" style="padding: 8px 16px;">Wyloguj ({{ session.get('user_name') }})</a>
+            {% else %}
+              <a href="/login" class="btn btn-primary">Zaloguj się / Rejestracja</a>
+            {% endif %}
+            {% if session.get('user_id') %}<a href="/profile" class="nav-link">Mój profil</a>{% endif %}
+          </nav>
+        </div>
+      </header>
+
+      <main class="container">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div style="padding: 16px; margin: 20px 0; border-radius: var(--radius); background: {% if category=='success' %}#d1fae5; color: #065f46; border: 2px solid #34d399;{% else %}#fee2e2; color: #991b1b; border: 2px solid #f87171;{% endif %} font-family: var(--font-body); font-weight: 600;">
+                {{ msg }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <section class="hero-section">
+          <img src="/css/logo.png" alt="Yo-Lingo" class="hero-logo">
+          <div class="hero-badge">🚀 Nowa platforma e-learningowa</div>
+          <h1 class="hero-title">
+            Ucz się języków<br>
+            <span class="gradient-text">skutecznie i nowocześnie</span>
+          </h1>
+          <p class="hero-subtitle">
+            Platforma e-learningowa z profesjonalnymi kursami językowymi<br>
+            prowadzonymi przez certyfikowanych lektorów
+          </p>
+          <div class="hero-actions">
+            <a href="/login" class="btn btn-large btn-primary">Rozpocznij naukę</a>
+            <a href="#dostepne-kursy" class="btn btn-large btn-outline">Zobacz kursy ↓</a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-number">24</div>
+              <div class="stat-label">Dostępne kursy</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-number">+18</div>
+              <div class="stat-label">Nowych lekcji / tydzień</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-number">A1–C1</div>
+              <div class="stat-label">Poziomy CEFR</div>
+            </div>
+          </div>
+        </section>
+
+        <section style="background: var(--bg-section); border: 2px solid var(--border-light); border-radius: var(--radius); padding: 20px; margin-bottom: 40px; font-family: var(--font-body);">
+          <form action="/" method="GET" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+            <div style="flex: 1; min-width: 200px;">
+              <input type="text" name="search" placeholder="Szukaj po nazwie kursu..." value="{{ request.args.get('search', '') }}" style="width: 100%; padding: 12px; border: 2px solid var(--border-medium); border-radius: var(--radius); font-size: 1rem;">
+            </div>
+            <div style="width: 180px;">
+              <select name="language" style="width: 100%; padding: 12px; border: 2px solid var(--border-medium); border-radius: var(--radius); font-size: 1rem;">
+                <option value="">Wszystkie języki</option>
+                {% for code, name in [('Spanish','Hiszpański'),('English','Angielski'),('German','Niemiecki'),('Italian','Włoski'),('French','Francuski'),('Portuguese','Portugalski'),('Japanese','Japoński'),('Russian','Rosyjski')] %}
+                  <option value="{{ code }}" {% if request.args.get('language') == code %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div style="width: 150px;">
+              <select name="level" style="width: 100%; padding: 12px; border: 2px solid var(--border-medium); border-radius: var(--radius); font-size: 1rem;">
+                <option value="">Poziom</option>
+                {% for lvl in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] %}
+                  <option value="{{ lvl }}" {% if request.args.get('level') == lvl %}selected{% endif %}>{{ lvl }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">Filtruj ofertę</button>
+            <a href="/" class="btn btn-outline" style="padding: 12px 16px;">Reset</a>
+          </form>
+        </section>
+
+        <section class="courses-section" id="dostepne-kursy">
+          <div class="section-header">
+            <div class="section-badge">Kursy</div>
+            <h2 class="section-title">Dostępne kursy językowe</h2>
+          </div>
+
+          <div class="courses-grid">
+            {% for course in courses %}
+            <div class="course-card {% if loop.index == 2 %}featured{% endif %}">
+              {% if loop.index == 2 %}<div class="featured-label">Najpopularniejszy</div>{% endif %}
+              <div class="course-header">
+                <div class="course-flag">
+                  <img src="/css/flags/{{ course.language|lower }}.svg" alt="{{ course.language }}" class="flag-icon large">
+                </div>
+                <span class="course-level">{{ course.proficiency_level }}</span>
+              </div>
+              <h3 class="course-title">{{ course.title }}</h3>
+              <p class="course-description">{{ course.description }}</p>
+              
+              <div class="course-stats">
+                <div class="course-stat">
+                  <span class="stat-icon">👨‍🏫</span>
+                  <span class="stat-text">Lektor: {{ course.teacher_name or 'System' }}</span>
+                </div>
+                <div class="course-stat">
+                  <span class="stat-icon">📚</span>
+                  <span class="stat-text">{{ course.lesson_count }} {{ 'lekcja' if course.lesson_count == 1 else 'lekcji' }}</span>
+                </div>
+              </div>
+
+              <div class="course-footer">
+                <div class="course-price">
+                  <span class="price-label">Cena</span>
+                  <span class="price-amount">{{ "%.2f"|format(course.price) }} zł</span>
+                </div>
+                <span class="availability-badge available">Aktywny</span>
+              </div>
+              
+              <a href="/course/{{ course.id }}" class="btn btn-block {% if loop.index == 2 %}btn-accent{% endif %}" style="text-align: center;">
+                Zobacz szczegóły kursu →
+              </a>
+            </div>
+            {% else %}
+              <p style="font-family: var(--font-body); color: var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 40px;">Brak dostępnych kursów spełniających kryteria.</p>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="features-section">
+          <div class="section-header centered">
+            <div class="section-badge">Dlaczego my?</div>
+            <h2 class="section-title">Profesjonalna nauka online</h2>
+          </div>
+
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">👨‍🏫</div>
+              <h3 class="feature-title">Certyfikowani lektorzy</h3>
+              <p class="feature-text">Kursy prowadzone przez doświadczonych nauczycieli z certyfikatami</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">📚</div>
+              <h3 class="feature-title">Materiały PDF i wideo</h3>
+              <p class="feature-text">Dostęp do profesjonalnych materiałów dydaktycznych</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🕐</div>
+              <h3 class="feature-title">Dostęp 24/7</h3>
+              <p class="feature-text">Ucz się kiedy chcesz, w swoim własnym tempie</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">♿</div>
+              <h3 class="feature-title">Zgodność z WCAG 2.1</h3>
+              <p class="feature-text">Platforma dostępna dla wszystkich użytkowników</p>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <p class="footer-text">© 2026 Yo-Lingo · Projekt studencki WSPA Lublin</p>
+        </footer>
+
+      </main>
+    </div>
+  </div>
+
+  <div class="mockup-footer">
+    <div class="mockup-info">
+      <span class="info-label">Projekt:</span>
+      <span class="info-value">Alicja Radłowska, Wiktor Patajewicz</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – Panel Lektora</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+<div class="mockup-presentation"><div class="browser-mockup"><div class="browser-content dashboard-page">
+
+  <div class="dashboard-topbar">
+    <div class="dashboard-brand">
+      <div class="logo-badge">YL</div>
+      <div class="brand-text">Yo-Lingo</div>
+      <span class="user-badge" style="background: rgba(139, 92, 246, 0.1); color: var(--brand-secondary); border-color: var(--brand-secondary);">Lektor / Nauczyciel</span>
+    </div>
+    <div style="display:flex; gap:12px; align-items:center;">
+      <a href="/" class="btn btn-outline" style="padding:8px 16px;">Strona Główna</a>
+      <a href="/profile" class="btn btn-outline" style="padding:8px 16px;">Mój profil</a>
+      <a href="/logout" class="btn" style="background:#e11d48; color:white;">Wyloguj</a>
+    </div>
+  </div>
+
+  <div class="dashboard-container">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for category, msg in messages %}
+        <div style="padding:14px;margin-bottom:20px;border-radius:var(--radius);background:{% if category=='success' %}#d1fae5;color:#065f46;{% elif category=='warning' %}#fef3c7;color:#92400e;{% else %}#fee2e2;color:#991b1b;{% endif %}font-family:var(--font-body);font-weight:bold;border:2px solid {% if category=='success' %}#34d399{% elif category=='warning' %}#fbbf24{% else %}#f87171{% endif %};">{{ msg }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <div class="dashboard-welcome">
+      <div class="welcome-text">
+        <h1>Panel Zarządzania Edukacją 👨‍🏫</h1>
+        <p>Lektor: <strong>{{ session.get('user_name') }}</strong> · Kreowanie programu nauczania</p>
+      </div>
+    </div>
+
+    <!-- STATYSTYKI LEKTORA (UC-31) -->
+    <div class="dashboard-stats-grid" style="margin-bottom:32px;">
+      <div class="dashboard-stat-card">
+        <div class="stat-card-icon">📚</div>
+        <div class="stat-card-number">{{ stats.total_courses }}</div>
+        <div class="stat-card-label">Moje kursy ({{ stats.active_courses }} aktywne)</div>
+      </div>
+      <div class="dashboard-stat-card">
+        <div class="stat-card-icon">👥</div>
+        <div class="stat-card-number">{{ stats.total_students }}</div>
+        <div class="stat-card-label">Zapisanych słuchaczy</div>
+      </div>
+      <div class="dashboard-stat-card">
+        <div class="stat-card-icon">💰</div>
+        <div class="stat-card-number">{{ "%.2f"|format(stats.total_revenue) }} zł</div>
+        <div class="stat-card-label">Łączny przychód</div>
+      </div>
+      <div class="dashboard-stat-card">
+        <div class="stat-card-icon">📨</div>
+        <div class="stat-card-number">{{ messages|length }}</div>
+        <div class="stat-card-label">Wiadomości w skrzynce</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:30px;font-family:var(--font-body);align-items:start;">
+
+      <!-- LEWA KOLUMNA: tworzenie kursu -->
+      <div style="background:var(--bg-section);border:2px solid var(--border-light);border-radius:var(--radius);padding:24px;">
+        <h2 style="font-size:1.25rem;margin-bottom:15px;font-weight:700;">Utwórz nowy kurs językowy</h2>
+        <form action="/teacher/course/add" method="POST">
+          <div style="margin-bottom:12px;">
+            <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:4px;">Nazwa / Tytuł kursu:</label>
+            <input type="text" name="title" required placeholder="np. Hiszpański dla podróżników" style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;">
+            <div style="flex:1;">
+              <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:4px;">Język wykładowy:</label>
+              <select name="language" required style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+                {% for code, name in [('Spanish','Hiszpański'),('English','Angielski'),('German','Niemiecki'),('Italian','Włoski'),('French','Francuski'),('Portuguese','Portugalski'),('Japanese','Japoński'),('Russian','Rosyjski')] %}
+                  <option value="{{ code }}">{{ name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div style="width:110px;">
+              <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:4px;">CEFR Poziom:</label>
+              <select name="proficiency_level" required style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+                {% for lvl in ['A1','A2','B1','B2','C1','C2'] %}<option value="{{ lvl }}">{{ lvl }}</option>{% endfor %}
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:4px;">Cena kursu (PLN):</label>
+            <input type="number" name="price" step="0.01" min="0" required placeholder="299.00" style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+          </div>
+          <div style="margin-bottom:15px;">
+            <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:4px;">Opis celów nauczania:</label>
+            <textarea name="description" rows="3" required placeholder="Wpisz krótki zarys programu, gramatyki i zagadnień..." style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);resize:none;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-accent" style="width:100%;padding:12px;">Opublikuj kurs na platformie</button>
+        </form>
+
+        <div style="margin-top:18px;padding:14px;background:white;border:1px dashed var(--border-medium);border-radius:var(--radius);font-size:0.85rem;color:var(--text-secondary);">
+          💡 <strong>Wskazówka:</strong> Po utworzeniu kursu kliknij „Podgląd lekcji", aby dodać lekcje i materiały dydaktyczne.
+        </div>
+      </div>
+
+      <!-- PRAWA KOLUMNA: lista kursów z zarządzaniem -->
+      <div>
+        <h2 class="section-title-dashboard" style="margin-bottom:15px;">Moje aktywne programy dydaktyczne</h2>
+
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          {% for course in courses %}
+          <div style="background:white;border:2px solid var(--border-light);border-radius:var(--radius);padding:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px;">
+              <div>
+                <h3 style="margin:0 0 4px;font-size:1.15rem;font-weight:700;">{{ course.title }}</h3>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <span style="padding:2px 8px;background:#eef2f6;border-radius:4px;font-size:0.75rem;font-weight:bold;color:var(--text-secondary);">{{ course.proficiency_level }}</span>
+                  <span style="padding:2px 8px;background:#eef2f6;border-radius:4px;font-size:0.75rem;color:var(--text-secondary);">{{ course.language }}</span>
+                  {% if course.is_active %}
+                    <span style="padding:2px 8px;background:#d1fae5;color:#065f46;border-radius:4px;font-size:0.75rem;font-weight:bold;">● Aktywny</span>
+                  {% else %}
+                    <span style="padding:2px 8px;background:#fee2e2;color:#991b1b;border-radius:4px;font-size:0.75rem;font-weight:bold;">○ Zakończony</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:12px;">{{ course.description }}</p>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--border-light);padding-top:10px;font-size:0.8rem;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+              <span style="color:var(--brand-primary);font-weight:bold;">👥 {{ course.student_count }} uczniów</span>
+              <span style="color:var(--text-secondary);">📚 {{ course.lesson_count }} lekcji</span>
+              <span style="color:var(--text-secondary);">📊 śr. postęp {{ "%.0f"|format(course.avg_progress) }}%</span>
+              <span style="font-weight:600;color:var(--text-muted);">{{ "%.2f"|format(course.price) }} zł</span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <a href="/course/{{ course.id }}/lessons" class="btn btn-primary" style="padding:7px;font-size:0.8rem;">📖 Lekcje i materiały</a>
+              <a href="/teacher/course/edit/{{ course.id }}" class="btn btn-outline" style="padding:7px;font-size:0.8rem;">✏️ Edytuj</a>
+              <form method="POST" action="/teacher/course/toggle/{{ course.id }}" style="margin:0;">
+                <button type="submit" class="btn btn-outline" style="width:100%;padding:7px;font-size:0.8rem;">
+                  {% if course.is_active %}⏸️ Zakończ kurs{% else %}▶️ Aktywuj kurs{% endif %}
+                </button>
+              </form>
+              <form method="POST" action="/teacher/course/delete/{{ course.id }}" onsubmit="return confirm('Czy na pewno usunąć kurs „{{ course.title }}'? Operacja jest nieodwracalna.');" style="margin:0;">
+                <button type="submit" class="btn btn-outline" style="width:100%;padding:7px;font-size:0.8rem;color:var(--danger);border-color:var(--danger);">🗑️ Usuń</button>
+              </form>
+            </div>
+          </div>
+          {% else %}
+            <p style="color:var(--text-muted);text-align:center;padding:40px;border:2px dashed var(--border-light);border-radius:var(--radius);">Nie utworzyłeś jeszcze żadnego autorskiego kursu.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- KOMUNIKATOR -->
+    <div class="dashboard-section" style="margin-top:40px;border-top:2px solid var(--border-light);padding-top:30px;font-family:var(--font-body);">
+      <h2 class="section-title-dashboard">Panel Komunikacji ze Słuchaczami</h2>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;">
+
+        <div style="background:white;padding:20px;border-radius:var(--radius);border:2px solid var(--border-light);max-height:380px;overflow-y:auto;">
+          <h3 style="margin-bottom:15px;font-size:1.1rem;">Skrzynka odbiorcza</h3>
+          {% for msg in messages %}
+            <div style="background:{% if not msg.is_read %}#eef2ff{% else %}#f8fafc{% endif %};border-left:4px solid {% if not msg.is_read %}var(--brand-primary){% else %}var(--brand-secondary){% endif %};padding:12px;border-radius:0 var(--radius) var(--radius) 0;margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px;">
+                <strong>Od ucznia: {{ msg.sender_name }}{% if not msg.is_read %} <span style="background:var(--brand-primary);color:white;padding:1px 6px;border-radius:4px;font-size:0.7rem;margin-left:6px;">Nowa</span>{% endif %}</strong>
+                <span>{{ msg.created_at }}</span>
+              </div>
+              <p style="font-size:0.9rem;margin:0;color:var(--text-primary);">{{ msg.content }}</p>
+            </div>
+          {% else %}
+            <p style="color:var(--text-muted);font-size:0.9rem;text-align:center;">Brak nowych wiadomości od uczniów.</p>
+          {% endfor %}
+        </div>
+
+        <div style="background:var(--bg-section);padding:20px;border-radius:var(--radius);border:2px solid var(--border-light);">
+          <h3 style="margin-bottom:15px;font-size:1.1rem;">Odpowiedz uczniowi</h3>
+          <form action="/messages/send" method="POST">
+            <div style="margin-bottom:15px;">
+              <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:5px;">Wybierz odbiorcę (Uczeń):</label>
+              <select name="receiver_id" required style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+                {% for student in students %}<option value="{{ student.id }}">{{ student.first_name }} {{ student.last_name }}</option>{% endfor %}
+              </select>
+            </div>
+            <div style="margin-bottom:15px;">
+              <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:5px;">Treść wiadomości:</label>
+              <textarea name="content" rows="4" required placeholder="Wpisz odpowiedź na zadane pytanie..." style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);resize:vertical;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Wyślij wiadomość zwrotną</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div></div></div>
+</body>
+</html>

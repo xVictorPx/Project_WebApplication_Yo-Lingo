@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – Edycja kursu</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+<div class="mockup-presentation"><div class="browser-mockup"><div class="browser-content dashboard-page">
+
+  <div class="dashboard-topbar">
+    <div class="dashboard-brand">
+      <div class="logo-badge">YL</div>
+      <div class="brand-text">Yo-Lingo</div>
+      <span class="user-badge">Edycja kursu</span>
+    </div>
+    <a href="/teacher/dashboard" class="btn btn-outline" style="padding:8px 16px;">← Panel lektora</a>
+  </div>
+
+  <div class="dashboard-container" style="max-width: 720px;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for category, msg in messages %}
+        <div style="padding:14px;margin-bottom:20px;border-radius:var(--radius);background:{% if category=='success' %}#d1fae5;color:#065f46;{% else %}#fee2e2;color:#991b1b;{% endif %}font-weight:bold;">{{ msg }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <div class="welcome-text" style="margin-bottom:24px;">
+      <h1>Edycja kursu</h1>
+      <p>Zaktualizuj dane kursu „{{ course.title }}".</p>
+    </div>
+
+    <form method="POST" action="/teacher/course/edit/{{ course.id }}" style="background:var(--bg-card);border:2px solid var(--border-light);border-radius:var(--radius-lg);padding:28px;font-family:var(--font-body);">
+
+      <div class="form-group">
+        <label>Tytuł kursu</label>
+        <input type="text" name="title" required value="{{ course.title }}">
+      </div>
+
+      <div style="display:flex;gap:14px;">
+        <div class="form-group" style="flex:1;">
+          <label>Język wykładowy</label>
+          <select name="language" required style="width:100%;padding:14px 16px;border:2px solid var(--border-light);border-radius:var(--radius);font-family:var(--font-body);">
+            {% for code, name in [('Spanish','Hiszpański'),('English','Angielski'),('German','Niemiecki'),('Italian','Włoski'),('French','Francuski'),('Portuguese','Portugalski'),('Japanese','Japoński'),('Russian','Rosyjski')] %}
+              <option value="{{ code }}" {% if course.language == code %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="width:140px;">
+          <label>Poziom CEFR</label>
+          <select name="proficiency_level" required style="width:100%;padding:14px 16px;border:2px solid var(--border-light);border-radius:var(--radius);font-family:var(--font-body);">
+            {% for lvl in ['A1','A2','B1','B2','C1','C2'] %}
+              <option value="{{ lvl }}" {% if course.proficiency_level == lvl %}selected{% endif %}>{{ lvl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Cena (PLN)</label>
+        <input type="number" name="price" step="0.01" min="0" required value="{{ "%.2f"|format(course.price) }}">
+      </div>
+
+      <div class="form-group">
+        <label>Opis kursu</label>
+        <textarea name="description" rows="4" required style="width:100%;padding:14px 16px;border:2px solid var(--border-light);border-radius:var(--radius);font-family:var(--font-body);resize:vertical;">{{ course.description }}</textarea>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <a href="/teacher/dashboard" class="btn btn-outline" style="flex:1;">Anuluj</a>
+        <button type="submit" class="btn btn-primary" style="flex:2;">Zapisz zmiany</button>
+      </div>
+    </form>
+  </div>
+
+</div></div></div>
+</body>
+</html>

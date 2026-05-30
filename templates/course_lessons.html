@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – {{ course.title }}</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+<div class="mockup-presentation"><div class="browser-mockup"><div class="browser-content dashboard-page">
+
+  <div class="dashboard-topbar">
+    <div class="dashboard-brand">
+      <div class="logo-badge">YL</div>
+      <div class="brand-text">Yo-Lingo</div>
+      <span class="user-badge">{{ 'Edycja kursu' if can_edit else 'Materiały kursu' }}</span>
+    </div>
+    <div style="display:flex; gap:12px;">
+      {% if session.get('role') == 'TEACHER' %}
+        <a href="/teacher/dashboard" class="btn btn-outline" style="padding:8px 16px;">← Panel lektora</a>
+      {% elif session.get('role') == 'ADMIN' %}
+        <a href="/admin/dashboard" class="btn btn-outline" style="padding:8px 16px;">← Panel admina</a>
+      {% else %}
+        <a href="/student/dashboard" class="btn btn-outline" style="padding:8px 16px;">← Mój panel</a>
+      {% endif %}
+      <a href="/profile" class="btn btn-outline" style="padding:8px 16px;">Mój profil</a>
+      <a href="/logout" class="btn" style="background: var(--text-secondary); color: white; padding:8px 16px;">Wyloguj</a>
+    </div>
+  </div>
+
+  <div class="dashboard-container" style="max-width: 1100px;">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for category, msg in messages %}
+        <div style="padding:14px;margin-bottom:20px;border-radius:var(--radius);background:{% if category=='success' %}#d1fae5;color:#065f46;{% elif category=='warning' %}#fef3c7;color:#92400e;{% else %}#fee2e2;color:#991b1b;{% endif %}font-family:var(--font-body);font-weight:bold;">{{ msg }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <!-- NAGŁÓWEK KURSU -->
+    <div style="background:var(--bg-card);border:2px solid var(--border-light);border-radius:var(--radius-lg);padding:28px;margin-bottom:28px;display:flex;gap:20px;align-items:center;">
+      <img src="/css/flags/{{ course.language|lower }}.svg" alt="{{ course.language }}" class="flag-icon large">
+      <div style="flex:1;">
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;">
+          <span style="background:var(--brand-gradient);color:white;padding:4px 10px;border-radius:6px;font-weight:bold;font-size:0.75rem;text-transform:uppercase;">{{ course.proficiency_level }}</span>
+          <span style="background:var(--bg-section);padding:4px 10px;border-radius:6px;font-size:0.75rem;color:var(--text-secondary);">{{ course.language }}</span>
+          {% if can_edit %}<span style="background:rgba(139,92,246,0.15);color:var(--brand-secondary);padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:bold;">Tryb edycji</span>{% endif %}
+        </div>
+        <h1 style="font-family:var(--font-display);font-size:2rem;letter-spacing:0.5px;margin-bottom:6px;">{{ course.title }}</h1>
+        <p style="color:var(--text-secondary);margin:0;">Lektor: <strong>{{ course.teacher_name or 'System' }}</strong> · Liczba lekcji: <strong>{{ lessons|length }}</strong></p>
+      </div>
+    </div>
+
+    <!-- FORMULARZ DODAWANIA LEKCJI (tylko lektor) -->
+    {% if can_edit %}
+      <details style="background:var(--bg-section);border:2px dashed var(--brand-secondary);border-radius:var(--radius);padding:0;margin-bottom:20px;font-family:var(--font-body);">
+        <summary style="padding:16px 22px;cursor:pointer;font-weight:700;color:var(--brand-secondary);">➕ Dodaj nową lekcję do kursu</summary>
+        <form method="POST" action="/teacher/lesson/add" style="padding:0 22px 22px;">
+          <input type="hidden" name="course_id" value="{{ course.id }}">
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <div style="flex:1;">
+              <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:4px;">Tytuł lekcji:</label>
+              <input type="text" name="title" required placeholder="np. Lekcja 3: Czasy przeszłe" style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+            </div>
+            <div style="width:120px;">
+              <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:4px;">Kolejność:</label>
+              <input type="number" name="sort_order" min="1" value="{{ lessons|length + 1 }}" style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="display:block;font-size:0.85rem;font-weight:bold;margin-bottom:4px;">Opis (opcjonalnie):</label>
+            <textarea name="description" rows="2" placeholder="Krótki opis zakresu lekcji..." style="width:100%;padding:10px;border:2px solid var(--border-medium);border-radius:var(--radius);resize:vertical;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-accent">Utwórz lekcję</button>
+        </form>
+      </details>
+    {% endif %}
+
+    <h2 class="section-title-dashboard" style="margin-bottom:16px;">Program kursu</h2>
+
+    {% if lessons %}
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        {% for lesson in lessons %}
+          {% set materials = materials_by_lesson.get(lesson.id, []) %}
+          <details {% if loop.first %}open{% endif %} style="background:var(--bg-card);border:2px solid var(--border-light);border-radius:var(--radius);overflow:hidden;">
+            <summary style="padding:18px 22px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;list-style:none;font-family:var(--font-body);">
+              <div style="display:flex;gap:16px;align-items:center;">
+                <div style="width:42px;height:42px;background:var(--brand-gradient);color:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;">{{ loop.index }}</div>
+                <div>
+                  <h3 style="font-family:var(--font-display);font-size:1.2rem;margin:0 0 2px;letter-spacing:0.3px;">{{ lesson.title }}</h3>
+                  <p style="margin:0;color:var(--text-muted);font-size:0.85rem;">{{ materials|length }} materiał(ów) dydaktycznych</p>
+                </div>
+              </div>
+              <span style="color:var(--text-muted);font-size:0.85rem;">▾</span>
+            </summary>
+
+            <div style="padding:0 22px 22px;border-top:1px solid var(--border-light);">
+              {% if lesson.description %}
+                <p style="color:var(--text-secondary);margin:16px 0 18px;font-size:0.95rem;">{{ lesson.description }}</p>
+              {% endif %}
+
+              {% if materials %}
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                  {% for m in materials %}
+                    <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--bg-section);border:1px solid var(--border-light);border-radius:var(--radius);">
+                      <div style="font-size:1.6rem;">
+                        {% if m.material_type == 'PDF' %}📄{% elif m.material_type == 'VIDEO' %}🎬{% else %}🔗{% endif %}
+                      </div>
+                      <div style="flex:1;min-width:0;">
+                        <strong>{{ m.title }}</strong>
+                        <div style="font-size:0.8rem;color:var(--text-muted);word-break:break-all;">{{ m.material_type }} · {{ m.resource_url }}</div>
+                      </div>
+                      <a href="{{ m.resource_url }}" target="_blank" rel="noopener" style="color:var(--brand-primary);font-weight:600;font-size:0.85rem;text-decoration:none;">Otwórz →</a>
+                      {% if can_edit %}
+                        <form method="POST" action="/teacher/material/delete/{{ m.id }}" onsubmit="return confirm('Usunąć materiał „{{ m.title }}'?');" style="margin:0;">
+                          <button type="submit" title="Usuń materiał" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.2rem;padding:0 4px;">🗑️</button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p style="color:var(--text-muted);font-style:italic;margin:16px 0 0;">{% if can_edit %}Dodaj pierwszy materiał poniżej.{% else %}Lektor nie dodał jeszcze materiałów do tej lekcji.{% endif %}</p>
+              {% endif %}
+
+              {% if can_edit %}
+                <!-- DODAWANIE MATERIAŁU DO TEJ LEKCJI -->
+                <details style="margin-top:18px;background:var(--bg-section);border:1px dashed var(--border-medium);border-radius:var(--radius);">
+                  <summary style="padding:12px 16px;cursor:pointer;font-weight:600;color:var(--brand-primary);font-size:0.9rem;">➕ Podepnij materiał (PDF / wideo / link)</summary>
+                  <form method="POST" action="/teacher/material/add" style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px;">
+                    <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
+                    <div style="display:flex;gap:8px;">
+                      <input type="text" name="title" required placeholder="Nazwa materiału" style="flex:1;padding:8px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+                      <select name="material_type" required style="width:140px;padding:8px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+                        <option value="PDF">PDF</option>
+                        <option value="VIDEO">Wideo</option>
+                        <option value="LINK">Link</option>
+                      </select>
+                    </div>
+                    <input type="url" name="resource_url" required placeholder="https://..." style="padding:8px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+                    <button type="submit" class="btn btn-primary" style="padding:8px;font-size:0.85rem;">Załącz materiał</button>
+                  </form>
+                </details>
+
+                <!-- EDYCJA / USUNIĘCIE LEKCJI -->
+                <details style="margin-top:10px;background:#fff7ed;border:1px dashed #fb923c;border-radius:var(--radius);">
+                  <summary style="padding:12px 16px;cursor:pointer;font-weight:600;color:#9a3412;font-size:0.9rem;">⚙️ Zarządzaj lekcją</summary>
+                  <div style="padding:0 16px 16px;">
+                    <form method="POST" action="/teacher/lesson/edit/{{ lesson.id }}" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">
+                      <input type="text" name="title" required value="{{ lesson.title }}" style="padding:8px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+                      <textarea name="description" rows="2" placeholder="Opis lekcji..." style="padding:8px;border:2px solid var(--border-medium);border-radius:var(--radius);resize:vertical;">{{ lesson.description or '' }}</textarea>
+                      <div style="display:flex;gap:8px;align-items:center;">
+                        <label style="font-size:0.85rem;">Kolejność:</label>
+                        <input type="number" name="sort_order" min="1" value="{{ lesson.sort_order }}" style="width:80px;padding:8px;border:2px solid var(--border-medium);border-radius:var(--radius);">
+                        <button type="submit" class="btn btn-outline" style="flex:1;padding:8px;font-size:0.85rem;">💾 Zapisz zmiany lekcji</button>
+                      </div>
+                    </form>
+                    <form method="POST" action="/teacher/lesson/delete/{{ lesson.id }}" onsubmit="return confirm('Usunąć lekcję „{{ lesson.title }}' wraz z materiałami?');">
+                      <button type="submit" class="btn btn-outline" style="width:100%;padding:8px;font-size:0.85rem;color:var(--danger);border-color:var(--danger);">🗑️ Usuń lekcję</button>
+                    </form>
+                  </div>
+                </details>
+              {% endif %}
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="background:var(--bg-section);padding:40px;text-align:center;border-radius:var(--radius);border:2px dashed var(--border-medium);">
+        <p style="color:var(--text-secondary);margin:0;">{% if can_edit %}Twój kurs nie ma jeszcze lekcji. Dodaj pierwszą przyciskiem powyżej.{% else %}Lektor nie utworzył jeszcze żadnych lekcji w tym kursie.{% endif %}</p>
+      </div>
+    {% endif %}
+
+  </div>
+
+</div></div></div>
+</body>
+</html>

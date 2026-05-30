@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – {{ course.title }}</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+<div class="mockup-presentation"><div class="browser-mockup"><div class="browser-content">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="logo-badge">YL</span><span class="brand-text">Yo-Lingo</span></div>
+      <nav class="nav">
+        <a href="/" class="nav-link">Kursy</a>
+        {% if session.get('user_id') %}
+          <a href="/profile" class="nav-link">Mój profil</a>
+          <a href="/logout" class="btn btn-outline" style="padding:8px 16px;">Wyloguj</a>
+        {% else %}
+          <a href="/login" class="btn btn-primary">Zaloguj się</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 30px; padding-bottom: 60px;">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for category, msg in messages %}
+        <div style="padding:14px;margin-bottom:20px;border-radius:var(--radius);background:{% if category=='success' %}#d1fae5;color:#065f46;{% elif category=='warning' %}#fef3c7;color:#92400e;{% else %}#fee2e2;color:#991b1b;{% endif %}font-family:var(--font-body);font-weight:bold;">{{ msg }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <a href="/" style="color:var(--brand-primary);text-decoration:none;font-weight:600;display:inline-block;margin-bottom:20px;">← Wróć do listy kursów</a>
+
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 30px; font-family: var(--font-body);">
+
+      <!-- LEWA: SZCZEGÓŁY -->
+      <div>
+        <div style="display:flex;gap:18px;align-items:center;margin-bottom:18px;">
+          <img src="/css/flags/{{ course.language|lower }}.svg" alt="{{ course.language }}" class="flag-icon large">
+          <div>
+            <div style="display:flex;gap:10px;margin-bottom:6px;">
+              <span style="background:var(--brand-gradient);color:white;padding:4px 10px;border-radius:6px;font-weight:bold;font-size:0.75rem;text-transform:uppercase;">{{ course.proficiency_level }}</span>
+              <span style="background:var(--bg-section);padding:4px 10px;border-radius:6px;font-size:0.75rem;color:var(--text-secondary);">{{ course.language }}</span>
+              {% if not course.is_active %}<span style="background:#fee2e2;color:#991b1b;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:bold;">Zakończony</span>{% endif %}
+            </div>
+            <h1 style="font-family:var(--font-display);font-size:2.4rem;letter-spacing:0.5px;">{{ course.title }}</h1>
+          </div>
+        </div>
+
+        <p style="color:var(--text-secondary);font-size:1rem;line-height:1.7;margin-bottom:24px;">{{ course.description }}</p>
+
+        <h2 class="section-title-dashboard" style="margin-bottom:16px;">Program kursu ({{ lessons|length }} {{ 'lekcja' if lessons|length == 1 else 'lekcje' }})</h2>
+
+        {% if lessons %}
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            {% for lesson in lessons %}
+              <div style="background:var(--bg-card);border:2px solid var(--border-light);border-radius:var(--radius);padding:16px 18px;display:flex;gap:14px;align-items:flex-start;">
+                <div style="width:36px;height:36px;background:var(--brand-gradient);color:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">{{ loop.index }}</div>
+                <div>
+                  <strong>{{ lesson.title }}</strong>
+                  {% if lesson.description %}<p style="color:var(--text-secondary);font-size:0.9rem;margin:4px 0 0;">{{ lesson.description }}</p>{% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="background:var(--bg-section);padding:30px;text-align:center;border-radius:var(--radius);border:2px dashed var(--border-medium);">
+            <p style="color:var(--text-muted);margin:0;">Lektor nie dodał jeszcze lekcji do tego kursu.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- PRAWA: KARTA ZAKUPU -->
+      <aside style="background:var(--bg-section);border:2px solid var(--border-light);border-radius:var(--radius-lg);padding:24px;position:sticky;top:30px;align-self:start;">
+        <div style="font-family:var(--font-display);font-size:2.4rem;color:var(--brand-primary);letter-spacing:0.5px;">{{ "%.2f"|format(course.price) }} zł</div>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:18px;">jednorazowo · dożywotni dostęp</p>
+
+        <div style="padding:14px;background:white;border:1px solid var(--border-light);border-radius:var(--radius);margin-bottom:18px;font-size:0.85rem;">
+          👨‍🏫 <strong>Lektor:</strong> {{ course.teacher_name or 'System' }}<br>
+          📚 <strong>Lekcji:</strong> {{ lessons|length }}<br>
+          🎯 <strong>Poziom:</strong> {{ course.proficiency_level }} (CEFR)
+        </div>
+
+        {% if already_enrolled %}
+          <a href="/course/{{ course.id }}/lessons" class="btn btn-accent btn-block">✓ Przejdź do lekcji</a>
+          <p style="text-align:center;font-size:0.85rem;color:var(--success);margin-top:10px;font-weight:600;">Masz dostęp do tego kursu</p>
+        {% elif not course.is_active %}
+          <button class="btn btn-block" disabled style="background:#ccc;cursor:not-allowed;">Kurs zakończony</button>
+        {% elif session.get('role') == 'STUDENT' %}
+          <a href="/course/checkout/{{ course.id }}" class="btn btn-primary btn-block">Zapisz się i zapłać online</a>
+        {% elif not session.get('user_id') %}
+          <a href="/login" class="btn btn-primary btn-block">Zaloguj się aby się zapisać</a>
+        {% else %}
+          <button class="btn btn-block" disabled style="background:#ccc;cursor:not-allowed;">Tylko słuchacze mogą zapisywać się na kursy</button>
+        {% endif %}
+
+        <div style="margin-top:14px;font-size:0.8rem;color:var(--text-muted);">
+          ✅ Materiały PDF i wideo<br>
+          ✅ Komunikator z lektorem<br>
+          ✅ 14-dniowa gwarancja zwrotu
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+</div></div></div>
+</body>
+</html>

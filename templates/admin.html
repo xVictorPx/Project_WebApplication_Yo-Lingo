@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – Panel Administratora</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <style>.admin-profile-link{display:inline-block;padding:8px 16px;margin-right:8px;border:2px solid var(--border-medium);border-radius:var(--radius);text-decoration:none;color:var(--text-primary);font-weight:600;}</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+
+<div class="mockup-presentation">
+  <div class="mockup-header">
+    <div class="mockup-title">Yo-Lingo Platform</div>
+    <div class="mockup-meta">Panel administratora · Kontrola Bazy Danych</div>
+  </div>
+
+  <div class="browser-mockup">
+    <div class="browser-bar">
+      <div class="browser-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <div class="browser-url">
+        <span class="lock-icon">🔒</span>
+        <span class="url-text">yo-lingo.pl/admin/dashboard</span>
+      </div>
+      <div class="browser-actions"></div>
+    </div>
+
+    <div class="browser-content dashboard-page" style="overflow-y: auto;">
+      
+      <div class="dashboard-topbar">
+        <div class="dashboard-brand">
+          <div class="logo-badge">YL</div>
+          <div class="brand-text">Yo-Lingo</div>
+          <span class="user-badge" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: var(--danger);">Administrator</span>
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+          <a href="/" class="btn btn-outline" style="padding: 8px 16px;">Strona Główna</a>
+          <a href="/profile" class="btn btn-outline" style="padding: 8px 16px;">Mój profil</a>
+          <a href="/logout" class="btn" style="background: var(--danger); color: white;">Wyloguj sesję</a>
+        </div>
+      </div>
+
+      <div class="dashboard-container">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div style="padding: 14px; margin-bottom: 20px; border-radius: var(--radius); background: #d1fae5; color: #065f46; font-family: var(--font-body); font-weight: bold; border: 2px solid #34d399;">
+                {{ msg }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="dashboard-header-section">
+          <div class="dashboard-welcome">
+            <div class="welcome-text">
+              <h1>Zarządzanie systemem ⚙️</h1>
+              <p>Przegląd platformy, kontrola ról użytkowników i czyszczenie zasobów.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-stats-grid">
+            <div class="dashboard-stat-card">
+              <div class="stat-card-icon">👥</div>
+              <div class="stat-card-number">{{ stats.total_users }}</div>
+              <div class="stat-card-label">Użytkowników ogółem</div>
+            </div>
+            <div class="dashboard-stat-card">
+              <div class="stat-card-icon">💳</div>
+              <div class="stat-card-number">{{ stats.total_payments }}</div>
+              <div class="stat-card-label">Sfinalizowanych wpłat</div>
+            </div>
+            <div class="dashboard-stat-card" style="border-color: var(--brand-primary);">
+              <div class="stat-card-icon">💰</div>
+              <div class="stat-card-number">{{ "%.2f"|format(stats.total_revenue) }} zł</div>
+              <div class="stat-card-label">Łączny przychód (E-commerce)</div>
+            </div>
+            <div class="dashboard-stat-card">
+              <div class="stat-card-icon">📊</div>
+              <div class="stat-card-number">{{ stats.active_courses_count }}</div>
+              <div class="stat-card-label">Aktywne kursy</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-section" style="font-family: var(--font-body);">
+          <h2 class="section-title-dashboard" style="margin-bottom: 24px;">Przegląd infrastruktury IT</h2>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+            <div style="background: var(--bg-section); border: 2px solid var(--border-light); border-radius: var(--radius); padding: 24px;">
+              <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">Status serwera</h3>
+              <div style="display: flex; align-items: center; gap: 8px; margin: 12px 0;">
+                <span style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success);"></span>
+                <strong>Python Flask Backend Active</strong>
+              </div>
+              <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">Nasłuchiwanie na porcie 5000</p>
+            </div>
+            <div style="background: var(--bg-section); border: 2px solid var(--border-light); border-radius: var(--radius); padding: 24px;">
+              <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">Baza danych</h3>
+              <div style="display: flex; align-items: center; gap: 8px; margin: 12px 0;">
+                <span style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success);"></span>
+                <strong>Relacyjna baza (SQLite/Postgres)</strong>
+              </div>
+              <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">7 tabel z kluczami obcymi</p>
+            </div>
+            <div style="background: var(--bg-section); border: 2px solid var(--border-light); border-radius: var(--radius); padding: 24px;">
+              <h3 style="font-size: 1.1rem; margin-bottom: 12px; font-weight: 700;">Powiadomienia mailowe</h3>
+              <div style="display: flex; align-items: center; gap: 8px; margin: 12px 0;">
+                <span style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success);"></span>
+                <strong>Konsola Loger Ready</strong>
+              </div>
+              <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">Mock powiadomień rejestracji i wpłat</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-section" style="font-family: var(--font-body); margin-top: 40px;">
+          <h2 class="section-title-dashboard" style="margin-bottom: 24px;">Zarządzanie kontami użytkowników</h2>
+
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: var(--bg-section); border-bottom: 2px solid var(--border-light);">
+                  <th style="padding: 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary);">Użytkownik</th>
+                  <th style="padding: 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary);">Rola systemowa</th>
+                  <th style="padding: 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary);">Status konta</th>
+                  <th style="padding: 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: var(--text-secondary);">Modyfikacja dostępu</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in users %}
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                  <td style="padding: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 40px; height: 40px; background: var(--brand-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                      </div>
+                      <div>
+                        <div style="font-weight: 600; margin-bottom: 2px;">{{ user.first_name }} {{ user.last_name }}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">{{ user.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="padding: 16px;">
+                    <span style="padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; {% if user.role=='ADMIN' %}background: #fee2e2; color: #991b1b;{% elif user.role=='TEACHER' %}background: #e0e7ff; color: #3730a3;{% else %}background: #d1fae5; color: #065f46;{% endif %}">
+                      {{ user.role }}
+                    </span>
+                  </td>
+                  <td style="padding: 16px;">
+                    <span style="font-weight: bold; color: {% if user.status == 'ACTIVE' %}var(--success){% else %}var(--danger){% endif %};">
+                      {{ user.status }}
+                    </span>
+                  </td>
+                  <td style="padding: 16px;">
+                    <form action="/admin/user/toggle/{{ user.id }}" method="POST" style="display:inline;">
+                      <button type="submit" class="btn {% if user.status == 'ACTIVE' %}btn-outline{% else %}btn-primary{% endif %}" style="padding: 6px 14px; font-size: 0.85rem;">
+                        {% if user.status == 'ACTIVE' %}Zablokuj dostęp{% else %}Aktywuj konto{% endif %}
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="dashboard-section" style="margin-top: 40px; border-top: 2px dashed var(--border-medium); padding-top: 30px; font-family: var(--font-body);">
+          <h2 class="section-title-dashboard" style="color: var(--danger); margin-bottom: 12px;">Czyszczenie bazy danych (Usuwanie kursów)</h2>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+            Zgodnie z wymaganiami projektowymi, administrator posiada uprawnienia do trwałego usuwania nieaktualnych lub nieaktywnych kursów z bazy danych wraz z powiązanymi strukturami (kaskadowo).
+          </p>
+          
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: var(--bg-section); border-bottom: 2px solid var(--border-light);">
+                  <th style="padding: 12px; text-align: left;">Nazwa kursu</th>
+                  <th style="padding: 12px; text-align: left;">Język / Poziom</th>
+                  <th style="padding: 12px; text-align: left;">Widoczność</th>
+                  <th style="padding: 12px; text-align: left;">Operacja destrukcyjna</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for course in courses %}
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                  <td style="padding: 12px; font-weight: 600;">{{ course.title }}</td>
+                  <td style="padding: 12px;">{{ course.language }} ({{ course.proficiency_level }})</td>
+                  <td style="padding: 12px;">
+                    {% if course.is_active == 1 %}
+                      <span style="color: var(--success); font-weight: bold;">Publiczny</span>
+                    {% else %}
+                      <span style="color: var(--warning); font-weight: bold;">Ukryty / Nieaktywny</span>
+                    {% endif %}
+                  </td>
+                  <td style="padding: 12px;">
+                    <form action="/admin/course/delete/{{ course.id }}" method="POST" onsubmit="return confirm('Czy na pewno chcesz bezpowrotnie usunąć ten kurs z bazy danych?');">
+                      <button type="submit" class="btn" style="background: var(--danger); color: white; padding: 6px 12px; font-size: 0.8rem; border: none; border-radius: var(--radius); cursor: pointer;">
+                        Usuń trwale z bazy
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="4" style="padding: 20px; text-align: center; color: var(--text-muted);">Brak kursów w bazie danych.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup-footer">
+    <div class="mockup-info">
+      <span class="info-label">Projekt:</span>
+      <span class="info-value">Alicja Radłowska, Wiktor Patajewicz</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

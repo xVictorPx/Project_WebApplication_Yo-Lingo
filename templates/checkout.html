@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yo-Lingo – Płatność za kurs</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/css/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body class="mockup-body">
+
+<div class="mockup-presentation">
+  <div class="browser-mockup">
+    <div class="browser-content dashboard-page">
+
+      <div class="dashboard-topbar">
+        <div class="dashboard-brand">
+          <div class="logo-badge">YL</div>
+          <div class="brand-text">Yo-Lingo</div>
+          <span class="user-badge">Płatność online</span>
+        </div>
+        <a href="/" class="btn btn-outline" style="padding: 8px 16px;">← Anuluj i wróć do kursów</a>
+      </div>
+
+      <div class="dashboard-container" style="max-width: 980px;">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div style="padding: 14px; margin-bottom: 20px; border-radius: var(--radius); background: {% if category=='success' %}#d1fae5; color: #065f46;{% elif category=='warning' %}#fef3c7; color: #92400e;{% else %}#fee2e2; color: #991b1b;{% endif %} font-family: var(--font-body); font-weight: bold;">
+                {{ msg }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="welcome-text" style="margin-bottom: 30px;">
+          <h1>Finalizacja zamówienia</h1>
+          <p>Krok 2 z 2 — wybierz metodę płatności i potwierdź zakup dostępu do kursu.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px; align-items: start; font-family: var(--font-body);">
+
+          <!-- LEWA KOLUMNA: FORMULARZ PŁATNOŚCI -->
+          <form method="POST" action="/course/enroll/{{ course.id }}" id="payment-form"
+                style="background: var(--bg-card); border: 2px solid var(--border-light); border-radius: var(--radius-lg); padding: 28px;">
+
+            <h2 style="font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 18px; letter-spacing: 0.5px;">Metoda płatności</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 22px;">
+              <label class="pay-opt" style="border: 2px solid var(--brand-primary); background: #eef2ff;">
+                <input type="radio" name="payment_method" value="BLIK" checked onchange="togglePay()" style="display:none;">
+                <div style="font-size: 1.4rem;">📱</div>
+                <strong>BLIK</strong>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Kod 6-cyfrowy</span>
+              </label>
+              <label class="pay-opt" style="border: 2px solid var(--border-light);">
+                <input type="radio" name="payment_method" value="CARD" onchange="togglePay()" style="display:none;">
+                <div style="font-size: 1.4rem;">💳</div>
+                <strong>Karta</strong>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Visa / MasterCard</span>
+              </label>
+              <label class="pay-opt" style="border: 2px solid var(--border-light);">
+                <input type="radio" name="payment_method" value="TRANSFER" onchange="togglePay()" style="display:none;">
+                <div style="font-size: 1.4rem;">🏦</div>
+                <strong>Przelew</strong>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Pay-by-link</span>
+              </label>
+            </div>
+
+            <!-- POLA BLIK -->
+            <div id="pay-blik" class="pay-fields">
+              <label style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">Kod BLIK z aplikacji bankowej:</label>
+              <input type="text" name="blik_code" inputmode="numeric" pattern="\d{6}" maxlength="6"
+                     placeholder="••••••" autocomplete="off"
+                     style="width: 100%; padding: 14px; border: 2px solid var(--border-medium); border-radius: var(--radius); font-size: 1.4rem; letter-spacing: 8px; text-align: center; font-family: monospace;">
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Kod wygenerujesz w aplikacji swojego banku. Ważny przez 2 minuty.</p>
+            </div>
+
+            <!-- POLA KARTY -->
+            <div id="pay-card" class="pay-fields" style="display:none;">
+              <label style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">Numer karty:</label>
+              <input type="text" name="card_number" inputmode="numeric" placeholder="4111 1111 1111 1111" autocomplete="off"
+                     style="width: 100%; padding: 12px; border: 2px solid var(--border-medium); border-radius: var(--radius); margin-bottom: 12px;">
+              <div style="display:flex; gap: 10px;">
+                <div style="flex:1;">
+                  <label style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">Data ważności:</label>
+                  <input type="text" name="card_expiry" placeholder="MM/RR" autocomplete="off"
+                         style="width: 100%; padding: 12px; border: 2px solid var(--border-medium); border-radius: var(--radius);">
+                </div>
+                <div style="width: 120px;">
+                  <label style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">CVV:</label>
+                  <input type="text" name="card_cvv" inputmode="numeric" maxlength="4" placeholder="123" autocomplete="off"
+                         style="width: 100%; padding: 12px; border: 2px solid var(--border-medium); border-radius: var(--radius);">
+                </div>
+              </div>
+            </div>
+
+            <!-- POLA PRZELEW -->
+            <div id="pay-transfer" class="pay-fields" style="display:none;">
+              <div style="padding: 16px; background: var(--bg-section); border: 1px dashed var(--border-medium); border-radius: var(--radius); font-size: 0.9rem; color: var(--text-secondary);">
+                Po kliknięciu „Zapłać" zostaniesz przekierowany do swojego banku w celu autoryzacji transakcji
+                metodą pay-by-link <em>(symulacja)</em>.
+              </div>
+            </div>
+
+            <label style="display:flex; align-items:flex-start; gap:10px; margin: 20px 0; font-size: 0.9rem; color: var(--text-secondary);">
+              <input type="checkbox" name="accept_terms" required style="margin-top: 3px;">
+              <span>Akceptuję <a href="#" style="color: var(--brand-primary);">regulamin</a> oraz potwierdzam,
+                że dostęp do treści cyfrowych rozpocznie się natychmiast po zaksięgowaniu płatności.</span>
+            </label>
+
+            <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+              🔒 Zapłać {{ "%.2f"|format(course.price) }} zł
+            </button>
+
+            <p style="text-align:center; font-size: 0.8rem; color: var(--text-muted); margin-top: 12px;">
+              Połączenie szyfrowane TLS · Yo-Lingo nie przechowuje danych Twojej karty.
+            </p>
+          </form>
+
+          <!-- PRAWA KOLUMNA: PODSUMOWANIE -->
+          <aside style="background: var(--bg-section); border: 2px solid var(--border-light); border-radius: var(--radius-lg); padding: 24px; position: sticky; top: 90px;">
+            <h2 style="font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 16px; letter-spacing: 0.5px;">Podsumowanie zamówienia</h2>
+
+            <div style="display:flex; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); margin-bottom: 16px;">
+              <img src="/css/flags/{{ course.language|lower }}.svg" alt="{{ course.language }}" class="flag-icon" style="flex-shrink:0;">
+              <div>
+                <h3 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 4px;">{{ course.title }}</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Poziom CEFR: <strong>{{ course.proficiency_level }}</strong></p>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 2px 0 0;">Lektor: {{ course.teacher_name or 'System' }}</p>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; font-size: 0.9rem; margin-bottom: 8px;">
+              <span style="color: var(--text-secondary);">Cena kursu</span>
+              <span>{{ "%.2f"|format(course.price) }} zł</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size: 0.9rem; margin-bottom: 8px;">
+              <span style="color: var(--text-secondary);">Opłata serwisowa</span>
+              <span style="color: var(--success); font-weight: 600;">0,00 zł</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+              <span>VAT zawarty w cenie (23%)</span>
+              <span>{{ "%.2f"|format(course.price * 0.23 / 1.23) }} zł</span>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:baseline; padding-top: 16px; border-top: 2px dashed var(--border-medium);">
+              <strong style="font-size: 1rem;">Do zapłaty:</strong>
+              <span style="font-family: var(--font-display); font-size: 2rem; color: var(--brand-primary);">{{ "%.2f"|format(course.price) }} zł</span>
+            </div>
+
+            <div style="margin-top: 16px; padding: 12px; background: white; border: 1px solid var(--border-light); border-radius: var(--radius); font-size: 0.8rem; color: var(--text-secondary);">
+              ✅ Dożywotni dostęp do materiałów<br>
+              ✅ Wsparcie lektora przez komunikator<br>
+              ✅ 14-dniowa gwarancja zwrotu
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .pay-opt {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 14px 8px; border-radius: var(--radius); cursor: pointer;
+    background: white; transition: all 0.15s ease; text-align: center;
+  }
+  .pay-opt:hover { border-color: var(--brand-primary) !important; }
+  .pay-opt strong { font-size: 0.9rem; }
+</style>
+
+<script>
+  function togglePay() {
+    const method = document.querySelector('input[name="payment_method"]:checked').value;
+    document.getElementById('pay-blik').style.display     = method === 'BLIK'     ? 'block' : 'none';
+    document.getElementById('pay-card').style.display     = method === 'CARD'     ? 'block' : 'none';
+    document.getElementById('pay-transfer').style.display = method === 'TRANSFER' ? 'block' : 'none';
+    document.querySelectorAll('.pay-opt').forEach(el => {
+      const r = el.querySelector('input');
+      el.style.border = r.checked ? '2px solid var(--brand-primary)' : '2px solid var(--border-light)';
+      el.style.background = r.checked ? '#eef2ff' : 'white';
+    });
+  }
+</script>
+
+</body>
+</html>
