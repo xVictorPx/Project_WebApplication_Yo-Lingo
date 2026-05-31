@@ -69,7 +69,7 @@ projekt/
 
 ```powershell
 # 1. Wejdź do katalogu projektu
-cd projekt
+cd yo_lingo_projekt
 
 # 2. Utwórz i aktywuj środowisko wirtualne
 python -m venv venv
@@ -85,7 +85,7 @@ python app.py
 ### Linux / macOS
 
 ```bash
-cd projekt
+cd yo_lingo_projekt
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
